@@ -13,7 +13,15 @@ Cypress.Commands.add("sql", (query) => {
       });
     } else {
       cy.task("queryDb", query).then((response) => {
-        return response.length == 1 ? response[0] : response; // flatten result
+        if(response.length == 0){
+          return "";
+        }
+        else if(response.length == 1){
+          return response[0]; // flatten result
+        }
+        else{
+          return response;
+        } 
       });
     }
   });
