@@ -3,7 +3,7 @@
     "mssql": "^9.1.1"
   },
   "name": "cypress-sql",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "cypress utility with custom commands to communicate with MS SQL server",
   "main": "index.js",
   "directories": {
