@@ -1,8 +1,9 @@
 // ***********************************************
 // These are custom commands which can be used to interact with the database from cypress
 // ***********************************************
-
-Cypress.Commands.add("sql", (query) => {
+module.exports = ()=>{
+  
+  Cypress.Commands.add("sql", (query) => {
     // validate query
     const sqlRegex = /(select|insert|update|delete|create|drop)\s+/i;
     if (!query) {
@@ -70,3 +71,4 @@ Cypress.Commands.add("sql", (query) => {
     getNextBatch();
   });
   
+}

@@ -46,7 +46,7 @@ In `cypress.env.json` file, create the configuration for db as shown
 In your `cypress.config.js` file, Import the Cypress-SQL module:
 
    ```javascript
-   const { sql } = require('cypress-sql');
+   const sql  = require('cypress-sql');
 
    module.exports = defineConfig({
     
@@ -63,8 +63,9 @@ In your `cypress.config.js` file, Import the Cypress-SQL module:
 In `cypress/support/e2e.js`. Register the commands in the support file as shown below:
 
 ```javascript
-import sqlServer from 'cypress-sql';
-sqlServer.loadDBCommands();
+const sql  = require('cypress-sql');
+
+sql.loadDBCommands();
 ```
 
 ### 4. Commands Usage: 
@@ -78,7 +79,7 @@ In your cypress tests
 
 ```javascript
 it('test case with cypress-sql', ()=>{
-    let query = "select HELLO_WORLD";
+    let query = "select 'HELLO_WORLD' as dummy_record";
     cy.sql(query).then((response)=>{
         expect(response).to.equal('HELLO_WORLD');
     })
@@ -94,7 +95,7 @@ it('test case with cypress-sql', ()=>{
 
 
 it('test case with backward compatibility for existing cypress-sql-server package', ()=>{
-    let query = "select HELLO_WORLD";
+    let query = "select 'HELLO_WORLD' as dummy_record";
     cy.sqlServer(query).then((response)=>{
         expect(response[0]).to.equal('HELLO_WORLD');
     })
