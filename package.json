@@ -3,18 +3,9 @@
     "mssql": "^9.1.1"
   },
   "name": "cypress-sql",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "cypress utility with custom commands to communicate with MS SQL server",
   "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
-  "devDependencies": {
-    "cypress": "^12.14.0"
-  },
-  "scripts": {
-    "test": "npm run test"
-  },
   "keywords": [
     "cypress-sql",
     "cypress",

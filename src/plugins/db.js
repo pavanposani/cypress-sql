@@ -19,22 +19,35 @@ async function getConnectionPool(config){
 function dbConnection(default_dbConfig){
 
         const all_methods = {
-            queryDb : async function queryDb(query, config){
+            queryDb : async function queryDb(args){
                 try{
-                    config = config == null ? default_dbConfig: config;
+                    let config;
+                    if(args.connectionConfig == null){
+                        config = default_dbConfig
+                    }else{
+                        config = args.connectionConfig;
+                    }
                     let pool = await getConnectionPool(config);
-                    const result = await pool.request().query(query);
+                    const result = await pool.request().query(args.query);
+                    await pool.close();
                     return (result.recordsets.length > 1)?  result.recordsets: result.recordset;
                 }
                 catch(err){
                     console.log(err);
                     throw new Error(err, query);
                 }
+                return null;
             },
-            storedProcedureDb: async function executeStoredProc(procedure_name, config){
-                config = config == null ? default_dbConfig: config;
+            storedProcedureDb: async function executeStoredProc(args){
+                let config;
+                if(args.connectionConfig == null){
+                    config = default_dbConfig
+                }else{
+                    config = args.connectionConfig;
+                }
                 let pool = await getConnectionPool(config);
                 const result = await pool.request().execute(procedure_name);
+                await pool.close();
                 return result; 
             }
         };
