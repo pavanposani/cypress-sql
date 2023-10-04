@@ -16,15 +16,16 @@ module.exports = ()=>{
       });
     } else {
       cy.task("queryDb", ({query, connectionConfig})).then((response) => {
-        if(response.length == 0){
-          return "";
+
+        if(response){
+          if(response.rowsAffected[0] == 0){
+            return JSON.stringify({"rowsAffected": response.rowsAffected[0]});
+          }else if(response.rowsAffected[0] == 1){
+            return response.recordsets[0][0];
+          }else {
+            return response.recordsets[0];
+          }
         }
-        else if(response.length == 1){
-          return response[0]; // flatten result
-        }
-        else{
-          return response;
-        } 
       });
     }
   });
@@ -33,20 +34,29 @@ module.exports = ()=>{
     // This command is just to facilitate backward compatibility of the existing scripts
     cy.task("queryDb", ({query, connectionConfig})).then((response) => {
       let result = [];
-      for (let record in response) {
-        result.push(Object.values(response[record]));
+      let modifiedResponse;
+      if(response){
+        if(response.rowsAffected[0] == 0){
+          return [];
+        }else if(response.rowsAffected[0] >= 1){
+          modifiedResponse = response.recordsets[0];
+        }
+      }
+      for (let record in modifiedResponse) {
+        result.push(Object.values(modifiedResponse[record]));
       }
       return result.length == 1 ? result[0] : result; // flatten result
     });
   });
   
-  Cypress.Commands.add("sqlBatch", (query, batch_size, connectionConfig, callback) => {
+  Cypress.Commands.add("sqlBatch", (batchQuery, batch_size=100, connectionConfig=null, callback) => {
+    //TODO : Need to fix the regex
     const sqlSelectRegex = /^select\s+.*\s+from\s+.*\s+order\s+by\s+\w+$/i;
-    if (!query || !sqlSelectRegex.test(query)) {
-      throw new Error(
-        `Invalid Query for batch processing,\n Query should follow the format of SELECT column1,...columnN FROM table ORDER BY column_name or SELECT * FROM table ORDER BY column_name`
-      );
-    }
+    // if (!query || !sqlSelectRegex.test(query)) {
+    //   throw new Error(
+    //     `Invalid Query for batch processing,\n Query should follow the format of SELECT column1,...columnN FROM table ORDER BY column_name or SELECT * FROM table ORDER BY column_name`
+    //   );
+    // }
   
     let offset = 0;
     let remainingRows = true;
@@ -56,17 +66,16 @@ module.exports = ()=>{
         return;
       }
   
-      const batchQuery =`${query} OFFSET ${offset} ROWS FETCH NEXT ${batch_size} ROWS ONLY`;
-      cy.task("queryDb", ({query, connectionConfig})).then((response) => {
-        if (response.length === batch_size) {
+      const query =`${batchQuery} OFFSET ${offset} ROWS FETCH NEXT ${batch_size} ROWS ONLY`;
+      cy.task("queryDb", ({query })).then((response) => {
+        callback(response.recordsets)
+        if (response.rowsAffected[0] === batch_size) {
           offset += batch_size;
-          callback(response);
+          callback(response.recordsets[0]);
           getNextBatch();
         } else {
           remainingRows = false;
-          if (response.length > 0) {
-            callback(response);
-          }
+          callback(response.recordsets[0]);
         }
       });
     }
